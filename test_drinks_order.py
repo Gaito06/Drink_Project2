@@ -17,11 +17,12 @@ class TestDrink(unittest.TestCase):
         drink = Drink("hill fog", size="medium")
         self.assertEqual(drink.get_size(), "medium")
     
-    def test_get_cost(self):
-        """Test the cost calculation."""
+    def test_get_total(self):
+        """Test the total cost calculation, including flavors."""
         drink = Drink("hill fog", size="medium")
         drink.add_flavor("lemon")
-        self.assertEqual(drink.get_cost(), 1.75 + 0.15)  # base cost of medium + cost of one flavor
+        # Base cost of medium + cost of one flavor
+        self.assertEqual(drink.get_total(), 1.75 + 0.15)
     
     def test_set_size(self):
         """Test setting the size."""
@@ -57,7 +58,7 @@ class TestOrder(unittest.TestCase):
         order.add_item(drink1)
         order.add_item(drink2)
         
-        expected_total = (1.75 + 0.15) + (2.05 + 0.15)
+        expected_total = (1.75 + 0.15) + (2.05 + 0.15)  # Base + flavor cost for both drinks
         expected_total_with_tax = expected_total * (1 + 0.0725)
         self.assertAlmostEqual(order.get_total(), expected_total_with_tax, places=2)
     
@@ -66,7 +67,7 @@ class TestOrder(unittest.TestCase):
         order = Order()
         drink1 = Drink("hill fog", size="medium")
         order.add_item(drink1)
-        self.assertEqual(order.get_num_items(), 1)
+        self.assertEqual(len(order.get_items()), 1)  # Using len to count items
     
     def test_get_receipt(self):
         """Test the receipt generation."""
