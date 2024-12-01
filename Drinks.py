@@ -1,134 +1,189 @@
-# Class to represent a Drink, which has a base and flavors
+from typing import List
+
 class Drink:
+    """
+    A class to represent a drink with a base and a list of flavors.
+    
+    Attributes:
+        base (str): The base of the drink (e.g., 'water', 'sbrite').
+        flavors (List[str]): A list of added flavors to the drink.
+    
+    Methods:
+        get_base: Returns the base of the drink.
+        get_flavors: Returns the list of flavors in the drink.
+        add_flavor: Adds a flavor to the drink if it is valid.
+        set_flavors: Sets a list of flavors for the drink.
+        get_total: Returns the total cost of the drink based on size and flavors.
+    """
+    
     # List of possible valid bases and flavors (these don't change)
     _valid_bases = ["water", "sbrite", "pokeacola", "Mr. Salt", "hill fog", "leaf wine"]
     _valid_flavors = ["lemon", "cherry", "strawberry", "mint", "blueberry", "lime"]
-
-    # Size cost table
-    SIZE_COSTS = {
-        'small': 1.50,
-        'medium': 1.75,
-        'large': 2.05,
-        'mega': 2.15
+    
+    # List of possible sizes and their associated prices
+    _size_prices = {
+        "small": 1.50,
+        "medium": 1.75,
+        "large": 2.05,
+        "mega": 2.15
     }
     
-    FLAVOR_COST = 0.15  # Cost for each flavor added
-
-    def __init__(self, base, size='small'):
-        """Constructor to initialize the base, size, and flavors."""
-        self._base = None
-        self._flavors = []
-        self._size = size.lower()  # Ensure size is case-insensitive
-
-        # Set the base if it's valid
-        if base in Drink._valid_bases:
-            self._base = base
+    def __init__(self, base: str, size: str):
+        """
+        Initializes the drink with a base and size.
+        
+        Args:
+            base (str): The base of the drink (e.g., 'water', 'sbrite').
+            size (str): The size of the drink (e.g., 'small', 'medium', 'large', 'mega').
+        
+        Raises:
+            ValueError: If the base or size is invalid.
+        """
+        # Set base if it's valid, else raise an exception
+        if base.lower() in Drink._valid_bases:
+            self._base = base.lower()  # Store base in lowercase
         else:
             raise ValueError("Invalid base")
         
-        # Validate size
-        if self._size not in Drink.SIZE_COSTS:
+        # Set size if it's valid, else raise an exception
+        if size.lower() in Drink._size_prices:
+            self._size = size.lower()  # Store size in lowercase
+        else:
             raise ValueError("Invalid size")
+        
+        # Initialize flavors as an empty list
+        self._flavors = []
 
-    # Getter for the base of the drink
-    def get_base(self):
+    def get_base(self) -> str:
+        """
+        Returns the base of the drink.
+        
+        Returns:
+            str: The base of the drink.
+        """
         return self._base
 
-    # Getter for the list of flavors
-    def get_flavors(self):
+    def get_flavors(self) -> List[str]:
+        """
+        Returns the list of flavors in the drink.
+        
+        Returns:
+            List[str]: List of flavors added to the drink.
+        """
         return self._flavors
 
-    # Getter for the number of flavors
-    def get_num_flavors(self):
-        return len(self._flavors)
-
-    # Getter for the size of the drink
-    def get_size(self):
-        return self._size
-
-    # Setter for size
-    def set_size(self, size):
-        size = size.lower()
-        if size not in Drink.SIZE_COSTS:
-            raise ValueError("Invalid size")
-        self._size = size
-
-    # Getter for the total cost of the drink
-    def get_cost(self):
-        """Calculate the total cost of the drink based on size and flavors."""
-        cost = Drink.SIZE_COSTS[self._size]
-        cost += len(self._flavors) * Drink.FLAVOR_COST
-        return cost
-
-    # Add a flavor to the drink
-    def add_flavor(self, flavor):
-        """Ensure that the flavor is valid and isn't already in the list."""
-        if flavor not in Drink._valid_flavors:
-            raise ValueError("Invalid flavor")
-        if flavor not in self._flavors:
-            self._flavors.append(flavor)
+    def add_flavor(self, flavor: str):
+        """
+        Adds a valid flavor to the drink.
+        
+        Args:
+            flavor (str): The flavor to be added to the drink.
+        
+        Raises:
+            ValueError: If the flavor is invalid or already added.
+        """
+        if flavor.lower() not in Drink._valid_flavors:
+            raise ValueError(f"Invalid flavor: {flavor}")
+        if flavor.lower() not in self._flavors:
+            self._flavors.append(flavor.lower())
         else:
             print(f"Flavor '{flavor}' is already added.")
 
-    # Set the list of flavors (replaces existing flavors)
-    def set_flavors(self, flavors):
-        """Set the list of flavors, ensuring they're valid and without duplicates."""
+    def set_flavors(self, flavors: List[str]):
+        """
+        Sets the list of flavors for the drink, replacing any existing ones.
+        
+        Args:
+            flavors (List[str]): A list of flavors to set for the drink.
+        
+        Raises:
+            ValueError: If any flavor is invalid.
+        """
         for flavor in flavors:
-            if flavor not in Drink._valid_flavors:
+            if flavor.lower() not in Drink._valid_flavors:
                 raise ValueError(f"Invalid flavor: {flavor}")
         self._flavors = list(set(flavors))  # Remove duplicates by converting to a set
 
-    # String representation of the drink (for easy printing)
-    def __str__(self):
-        flavor_str = f" with {', '.join(self._flavors)}" if self._flavors else ""
-        return f"{self._base.capitalize()} ({self._size.capitalize()}){flavor_str} - ${self.get_cost():.2f}"
+    def get_total(self) -> float:
+        """
+        Calculates the total cost of the drink based on its size and added flavors.
+        
+        Returns:
+            float: The total cost of the drink.
+        """
+        # Start with the base price for the drink size
+        total_cost = Drink._size_prices[self._size]
+        
+        # Add $0.15 for each added flavor
+        total_cost += 0.15 * len(self._flavors)
+        
+        return total_cost
 
 
 class Order:
-    TAX_RATE = 0.0725  # 7.25% tax
-
+    """
+    A class to represent an order containing multiple drinks.
+    
+    Attributes:
+        items (List[Drink]): A list of drinks in the order.
+    
+    Methods:
+        add_item: Adds a drink to the order.
+        get_items: Returns the list of drinks in the order.
+        get_total: Returns the total cost of the order, including tax.
+        get_receipt: Returns a string summary of the order.
+    """
+    
     def __init__(self):
-        # Private list to store drinks
+        """
+        Initializes the order with an empty list of items (drinks).
+        """
         self._items = []
 
-    # Getter for the list of items in the order
-    def get_items(self):
-        return self._items
-
-    # Getter for the total price of the order
-    def get_total(self):
-        """Calculate the total order cost, including tax."""
-        total = sum(drink.get_cost() for drink in self._items)  # Sum costs of all drinks
-        total_with_tax = total * (1 + Order.TAX_RATE)
-        return total_with_tax
-
-    # Getter for the number of items in the order
-    def get_num_items(self):
-        return len(self._items)
-
-    # Getter for the receipt (returns a string summary of the order)
-    def get_receipt(self):
-        """Generate the receipt for the order."""
-        receipt = "Receipt:\n"
-        for i, drink in enumerate(self._items):
-            receipt += f"Drink {i + 1}: Base = {drink.get_base()}, Size = {drink.get_size()}, Flavors = {', '.join(drink.get_flavors())}, Cost: ${drink.get_cost():.2f}\n"
+    def add_item(self, drink: Drink):
+        """
+        Adds a drink to the order.
         
-        total_order_cost = self.get_total()
-        receipt += f"\nTotal Order Cost (including tax): ${total_order_cost:.2f}"
-        return receipt
-
-    # Add a drink to the order
-    def add_item(self, drink):
-        """Add a drink to the order."""
+        Args:
+            drink (Drink): The drink object to add to the order.
+        
+        Raises:
+            ValueError: If the item added is not a valid Drink object.
+        """
         if isinstance(drink, Drink):
             self._items.append(drink)
         else:
             raise ValueError("Item must be a Drink object")
 
-    # Remove a drink from the order by index
-    def remove_item(self, index):
-        """Remove a drink from the order by index."""
-        if 0 <= index < len(self._items):
-            del self._items[index]
-        else:
-            raise IndexError("Item index out of range")
+    def get_items(self) -> List[Drink]:
+        """
+        Returns the list of drinks in the order.
+        
+        Returns:
+            List[Drink]: A list of Drink objects in the order.
+        """
+        return self._items
+
+    def get_total(self) -> float:
+        """
+        Calculates the total cost of the order, including tax (7.25%).
+        
+        Returns:
+            float: The total cost of the order, including tax.
+        """
+        subtotal = sum(drink.get_total() for drink in self._items)
+        tax = subtotal * 0.0725  # Tax rate of 7.25%
+        return subtotal + tax
+
+    def get_receipt(self) -> str:
+        """
+        Generates a receipt summarizing the order, including each drink and the total cost.
+        
+        Returns:
+            str: A string receipt summarizing the order.
+        """
+        receipt = "Receipt:\n"
+        for i, drink in enumerate(self._items):
+            receipt += f"Drink {i + 1}: Base = {drink.get_base()}, Flavors = {', '.join(drink.get_flavors())}, Total = ${drink.get_total():.2f}\n"
+        receipt += f"Order Total: ${self.get_total():.2f}\n"
+        return receipt
